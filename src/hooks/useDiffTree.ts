@@ -4,7 +4,6 @@ import {
   buildDiffTree,
   getAllExpandablePaths,
   getPathsToDepth,
-  getInitialExpandedPaths,
 } from '../utils/diff';
 
 export interface UseDiffTreeResult {
