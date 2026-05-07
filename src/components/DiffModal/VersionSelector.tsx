@@ -3,8 +3,6 @@ import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ArrowsRightLeftIcon } from '@heroicons/react/20/solid';
 import type { VersionSelectorProps } from '../../types/diff';
 import { formatDate } from '../../utils/diff';
-import checkboxChecked from '../../assets/toggle-checkbox-checked-filled.svg';
-import checkboxUnchecked from '../../assets/toggle-checkbox.svg';
 import chevronDown from '../../assets/navigation-chevron-down.svg';
 
 export function VersionSelector({
@@ -13,9 +11,6 @@ export function VersionSelector({
   toVersion,
   onFromChange,
   onToChange,
-  showSummaryOption = true,
-  summaryMode = false,
-  onSummaryModeChange,
 }: VersionSelectorProps) {
   const fromVersionObj = versions.find((v) => v.id === fromVersion);
   const toVersionObj = versions.find((v) => v.id === toVersion);
@@ -27,24 +22,8 @@ export function VersionSelector({
 
   return (
     <div className="flex items-center gap-4 flex-wrap">
-      {/* Summary mode toggle */}
-      {showSummaryOption && onSummaryModeChange && (
-        <button
-          onClick={() => onSummaryModeChange(!summaryMode)}
-          className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer"
-        >
-          <img
-            src={summaryMode ? checkboxChecked : checkboxUnchecked}
-            alt={summaryMode ? 'Checked' : 'Unchecked'}
-            className="w-5 h-5"
-          />
-          View Summary (compare to previous)
-        </button>
-      )}
-
       {/* Version selectors */}
-      {!summaryMode && (
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
           {/* From version */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">From:</span>
@@ -166,7 +145,6 @@ export function VersionSelector({
             </Listbox>
           </div>
         </div>
-      )}
     </div>
   );
 }

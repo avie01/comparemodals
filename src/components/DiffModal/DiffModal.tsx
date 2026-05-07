@@ -120,11 +120,6 @@ export function DiffModal({
                         toVersion={versionComparison.toVersionId || ''}
                         onFromChange={versionComparison.setFromVersionId}
                         onToChange={versionComparison.setToVersionId}
-                        showSummaryOption={versions.length > 1}
-                        summaryMode={versionComparison.mode === 'summary'}
-                        onSummaryModeChange={(enabled) =>
-                          versionComparison.setMode(enabled ? 'summary' : 'compare')
-                        }
                       />
                     </div>
                   )}
