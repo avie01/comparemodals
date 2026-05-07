@@ -2,9 +2,12 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/20/solid';
-import type { DiffOptions } from '../../types/diff';
+import type { DiffOptions, Version } from '../../types/diff';
 import { useDiffTree } from '../../hooks/useDiffTree';
+import { useVersionComparison } from '../../hooks/useVersionComparison';
 import { DiffTreeV1 } from './DiffTreeV1';
+import { VersionSelector } from './VersionSelector';
+import { formatDate } from '../../utils/diff';
 import fileDocumentIcon from '../../assets/file-document.svg';
 
 export interface DiffModalV1Props {
@@ -16,12 +19,18 @@ export interface DiffModalV1Props {
   title: string;
   /** Subtitle or description */
   subtitle?: string;
-  /** Source data for comparison */
+  /** Source data for comparison (used when versions not provided) */
   fromData?: Record<string, unknown>;
-  /** Target data for comparison (this is what gets displayed) */
+  /** Target data for comparison (used when versions not provided) */
   toData?: Record<string, unknown>;
   /** Label for value column (default: "Value") */
   valueLabel?: string;
+  /** Enable version selector mode with list of versions */
+  versions?: Version[];
+  /** Initially selected from version (defaults to second version) */
+  initialFromVersion?: string;
+  /** Initially selected to version (defaults to first version) */
+  initialToVersion?: string;
   /** Diff algorithm options */
   diffOptions?: DiffOptions;
   /** Additional CSS classes for the modal */
@@ -33,12 +42,26 @@ export function DiffModalV1({
   onClose,
   title,
   subtitle,
-  fromData,
-  toData,
+  fromData: directFromData,
+  toData: directToData,
   valueLabel = 'Value',
+  versions,
+  initialFromVersion,
+  initialToVersion,
   diffOptions,
   className = '',
 }: DiffModalV1Props) {
+  // Version comparison mode (when versions prop is provided)
+  const versionComparison = useVersionComparison(
+    versions || [],
+    initialFromVersion,
+    initialToVersion
+  );
+
+  // Determine which data to use
+  const fromData = versions ? versionComparison.fromData : directFromData;
+  const toData = versions ? versionComparison.toData : directToData;
+
   const {
     diffNodes,
     expandedPaths,
@@ -47,6 +70,11 @@ export function DiffModalV1({
     collapseAll,
     totalChanges,
   } = useDiffTree(fromData || {}, toData || {}, diffOptions);
+
+  // Build subtitle from version info
+  const versionSubtitle = versions && versionComparison.toVersion
+    ? `${formatDate(versionComparison.toVersion.timestamp)} - ${versionComparison.toVersion.author || 'Unknown'} - ${versionComparison.toVersion.id}`
+    : subtitle;
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -91,9 +119,9 @@ export function DiffModalV1({
                         <Dialog.Title className="text-[18px] font-semibold text-[#32373F] leading-[30px]">
                           {title}
                         </Dialog.Title>
-                        {subtitle && (
+                        {versionSubtitle && (
                           <p className="text-sm text-gray-500 mt-0.5">
-                            {subtitle}
+                            {versionSubtitle}
                           </p>
                         )}
                       </div>
@@ -105,6 +133,19 @@ export function DiffModalV1({
                       <XMarkIcon className="h-5 w-5 text-gray-500" />
                     </button>
                   </div>
+
+                  {/* Version selector (if versions provided) */}
+                  {versions && versions.length > 1 && (
+                    <div className="mt-4">
+                      <VersionSelector
+                        versions={versions}
+                        fromVersion={versionComparison.fromVersionId || ''}
+                        toVersion={versionComparison.toVersionId || ''}
+                        onFromChange={versionComparison.setFromVersionId}
+                        onToChange={versionComparison.setToVersionId}
+                      />
+                    </div>
+                  )}
 
                   {/* Simple summary and controls */}
                   <div className="flex items-center justify-between mt-4">

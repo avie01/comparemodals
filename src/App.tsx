@@ -569,9 +569,7 @@ function App() {
         isOpen={v1ModalOpen}
         onClose={() => setV1ModalOpen(false)}
         title="System Configuration Updated"
-        subtitle="Review changes to configuration, records, and permissions"
-        fromData={dataV1}
-        toData={dataV2}
+        versions={sampleVersions}
         valueLabel="Value"
       />
     </div>
