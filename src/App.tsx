@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DiffModal } from './components/DiffModal';
+import { DiffModal, DiffModalV1 } from './components/DiffModal';
 import type { Version } from './types/diff';
 
 // Sample data matching the screenshot structure
@@ -145,6 +145,7 @@ function App() {
   const [checkpointModalOpen, setCheckpointModalOpen] = useState(false);
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [simpleModalOpen, setSimpleModalOpen] = useState(false);
+  const [v1ModalOpen, setV1ModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 flex items-center justify-center">
@@ -157,7 +158,7 @@ function App() {
           versions or configurations.
         </p>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 text-left">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 text-left">
           {/* Checkpoint Comparison Card */}
           <div className="bg-white rounded-[2px] border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
@@ -208,6 +209,23 @@ function App() {
               Compare objects
             </button>
           </div>
+
+          {/* V1 Simplified Modal Card */}
+          <div className="bg-white rounded-[2px] border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              V1 Simplified view
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Simplified modal with single value column, no change indicators,
+              and no colored styling.
+            </p>
+            <button
+              onClick={() => setV1ModalOpen(true)}
+              className="w-full px-4 py-2 bg-[#3560C1] text-white rounded-[2px] font-medium hover:bg-[#2a4fa3] transition-colors"
+            >
+              View simplified modal
+            </button>
+          </div>
         </div>
 
       </div>
@@ -249,6 +267,22 @@ function App() {
         toData={checkpointV2}
         fromLabel="Before"
         toLabel="After"
+      />
+
+      {/* V1 Simplified Modal */}
+      <DiffModalV1
+        isOpen={v1ModalOpen}
+        onClose={() => setV1ModalOpen(false)}
+        title="'Inspection' Record Type Updated"
+        subtitle="Simplified view - single value column"
+        fromData={checkpointV1}
+        toData={checkpointV2}
+        valueLabel="Value"
+        onConfirm={() => {
+          alert('Changes confirmed!');
+          setV1ModalOpen(false);
+        }}
+        confirmLabel="Confirm"
       />
     </div>
   );
