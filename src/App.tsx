@@ -2,114 +2,419 @@ import { useState } from 'react';
 import { DiffModal, DiffModalV1 } from './components/DiffModal';
 import type { Version } from './types/diff';
 
-// Sample data matching the screenshot structure
-const checkpointV1: Record<string, unknown> = {
-  'User Information Tab': {
-    description: 'Example domain description',
-    'Home Address Section': {
-      'Phone Number Field': {
-        id: 'asdh5f-dsa21-pkj8sa-dasj31-dsa231d',
-        mandatoryFlag: false,
-        displayOrder: 3,
+// Deep nested sample data for complex hierarchies
+const dataV1: Record<string, unknown> = {
+  'Config Management': {
+    Settings: {
+      'Feature Flags': {
+        'Dark Mode': {
+          id: 'ff-dark-mode-001',
+          enabled: false,
+          rolloutPercentage: 0,
+          targetAudience: 'internal',
+          description: 'Enable dark mode theme',
+        },
+        'Beta Features': {
+          id: 'ff-beta-001',
+          enabled: true,
+          rolloutPercentage: 25,
+          targetAudience: 'beta-testers',
+          description: 'Access to beta features',
+        },
+        'New Dashboard': {
+          id: 'ff-dashboard-001',
+          enabled: false,
+          rolloutPercentage: 0,
+          targetAudience: 'all',
+          description: 'New dashboard layout',
+        },
       },
-      sectionName: 'Address Info',
-      editable: false,
-    },
-  },
-  'Submit Form Workflow Transition': {
-    name: null,
-    usedInRules: false,
-  },
-  metadata: {
-    version: '10.2.10.62',
-    recordType: 'Inspection',
-  },
-};
-
-const checkpointV2: Record<string, unknown> = {
-  'User Information Tab': {
-    description: 'Updated domain description',
-    'Home Address Section': {
-      'Phone Number Field': {
-        id: 'asdh5f-dsa21-pkj8sa-dasj31-dsa231d',
-        mandatoryFlag: true, // Changed from false to true
-        displayOrder: 4, // Changed from 3 to 4
+      'System Preferences': {
+        timezone: 'UTC',
+        dateFormat: 'MM/DD/YYYY',
+        language: 'en-US',
       },
-      sectionName: 'Home Address Section', // Changed from 'Address Info'
-      editable: true, // Changed from false to true
+    },
+    'Environment Variables': {
+      API_TIMEOUT: 30000,
+      MAX_RETRIES: 3,
+      LOG_LEVEL: 'info',
     },
   },
-  'Submit Form Workflow Transition': {
-    name: 'Submit Form Workflow Transition', // Added
-    usedInRules: true, // Changed from false to true
+  'Record Configuration': {
+    'Inspection Domain': {
+      'Workflow Events': {
+        'On Submit': {
+          id: 'wf-submit-001',
+          triggerType: 'user-action',
+          enabled: true,
+          actions: ['validate', 'save'],
+          notifyUsers: false,
+        },
+        'On Approve': {
+          id: 'wf-approve-001',
+          triggerType: 'user-action',
+          enabled: true,
+          actions: ['update-status', 'notify'],
+          notifyUsers: true,
+        },
+        'On Reject': {
+          id: 'wf-reject-001',
+          triggerType: 'user-action',
+          enabled: false,
+          actions: ['update-status'],
+          notifyUsers: false,
+        },
+      },
+      Rules: {
+        'Required Fields Rule': {
+          id: 'rule-req-001',
+          ruleType: 'validation',
+          priority: 1,
+          condition: 'field.isEmpty()',
+          errorMessage: 'This field is required',
+          active: true,
+        },
+        'Date Range Rule': {
+          id: 'rule-date-001',
+          ruleType: 'validation',
+          priority: 2,
+          condition: 'startDate <= endDate',
+          errorMessage: 'Start date must be before end date',
+          active: true,
+        },
+      },
+      Fields: {
+        inspectionDate: 'date',
+        inspector: 'lookup',
+        status: 'picklist',
+      },
+    },
+    'Permit Domain': {
+      'Workflow Events': {
+        'On Create': {
+          id: 'wf-create-002',
+          triggerType: 'system',
+          enabled: true,
+          actions: ['assign-number', 'set-defaults'],
+          notifyUsers: false,
+        },
+      },
+      Fields: {
+        permitNumber: 'auto-number',
+        applicant: 'lookup',
+        expirationDate: 'date',
+      },
+    },
   },
-  metadata: {
-    version: '10.2.10.63',
-    recordType: 'Inspection',
-  },
-  auditLog: {
-    // New section
-    enabled: true,
-    retentionDays: 90,
+  'User Management': {
+    'Roles & Permissions': {
+      Administrator: {
+        'Domain Permissions': {
+          'Inspection Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: null },
+            Delete: { granted: true, conditions: null },
+            'Approve Records': { granted: true, conditions: null },
+            'Export Data': { granted: true, conditions: null },
+          },
+          'Permit Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: null },
+            Delete: { granted: true, conditions: null },
+            'Issue Permit': { granted: true, conditions: null },
+          },
+        },
+        'System Permissions': {
+          'Manage Users': true,
+          'Manage Roles': true,
+          'View Audit Log': true,
+          'System Settings': true,
+        },
+      },
+      Inspector: {
+        'Domain Permissions': {
+          'Inspection Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: 'owner === currentUser' },
+            Delete: { granted: false, conditions: null },
+            'Approve Records': { granted: false, conditions: null },
+            'Export Data': { granted: true, conditions: null },
+          },
+          'Permit Domain': {
+            Create: { granted: false, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: false, conditions: null },
+            Delete: { granted: false, conditions: null },
+            'Issue Permit': { granted: false, conditions: null },
+          },
+        },
+        'System Permissions': {
+          'Manage Users': false,
+          'Manage Roles': false,
+          'View Audit Log': false,
+          'System Settings': false,
+        },
+      },
+    },
+    'User Groups': {
+      'Field Team': {
+        members: 12,
+        defaultRole: 'Inspector',
+      },
+      'Office Staff': {
+        members: 8,
+        defaultRole: 'Reviewer',
+      },
+    },
   },
 };
 
-// More complex sample for config import/export
-const currentConfig: Record<string, unknown> = {
-  authentication: {
-    provider: 'oauth2',
-    timeout: 3600,
-    allowedDomains: ['example.com', 'corp.example.com'],
-  },
-  notifications: {
-    email: {
-      enabled: true,
-      recipients: ['admin@example.com'],
+const dataV2: Record<string, unknown> = {
+  'Config Management': {
+    Settings: {
+      'Feature Flags': {
+        'Dark Mode': {
+          id: 'ff-dark-mode-001',
+          enabled: true, // Changed
+          rolloutPercentage: 100, // Changed
+          targetAudience: 'all', // Changed
+          description: 'Enable dark mode theme',
+        },
+        'Beta Features': {
+          id: 'ff-beta-001',
+          enabled: true,
+          rolloutPercentage: 50, // Changed
+          targetAudience: 'beta-testers',
+          description: 'Access to beta features',
+        },
+        'New Dashboard': {
+          id: 'ff-dashboard-001',
+          enabled: true, // Changed
+          rolloutPercentage: 75, // Changed
+          targetAudience: 'internal', // Changed
+          description: 'New dashboard layout with analytics',  // Changed
+        },
+        'AI Assistant': { // New feature flag
+          id: 'ff-ai-001',
+          enabled: true,
+          rolloutPercentage: 10,
+          targetAudience: 'internal',
+          description: 'AI-powered assistant',
+        },
+      },
+      'System Preferences': {
+        timezone: 'America/New_York', // Changed
+        dateFormat: 'YYYY-MM-DD', // Changed
+        language: 'en-US',
+        autoSave: true, // New
+      },
     },
-    slack: {
-      enabled: false,
+    'Environment Variables': {
+      API_TIMEOUT: 60000, // Changed
+      MAX_RETRIES: 5, // Changed
+      LOG_LEVEL: 'debug', // Changed
+      CACHE_TTL: 3600, // New
     },
   },
-  features: {
-    darkMode: false,
-    betaFeatures: ['featureA', 'featureB'],
-  },
-};
-
-const importedConfig: Record<string, unknown> = {
-  authentication: {
-    provider: 'oauth2',
-    timeout: 7200, // Changed
-    allowedDomains: ['example.com', 'corp.example.com', 'partner.example.com'], // Added
-    mfa: {
-      // New section
-      required: true,
-      methods: ['totp', 'sms'],
+  'Record Configuration': {
+    'Inspection Domain': {
+      'Workflow Events': {
+        'On Submit': {
+          id: 'wf-submit-001',
+          triggerType: 'user-action',
+          enabled: true,
+          actions: ['validate', 'save', 'notify-supervisor'], // Changed - added action
+          notifyUsers: true, // Changed
+        },
+        'On Approve': {
+          id: 'wf-approve-001',
+          triggerType: 'user-action',
+          enabled: true,
+          actions: ['update-status', 'notify', 'generate-report'], // Changed - added action
+          notifyUsers: true,
+        },
+        'On Reject': {
+          id: 'wf-reject-001',
+          triggerType: 'user-action',
+          enabled: true, // Changed
+          actions: ['update-status', 'notify-applicant'], // Changed - added action
+          notifyUsers: true, // Changed
+        },
+        'On Escalate': { // New workflow event
+          id: 'wf-escalate-001',
+          triggerType: 'system',
+          enabled: true,
+          actions: ['notify-manager', 'update-priority'],
+          notifyUsers: true,
+        },
+      },
+      Rules: {
+        'Required Fields Rule': {
+          id: 'rule-req-001',
+          ruleType: 'validation',
+          priority: 1,
+          condition: 'field.isEmpty()',
+          errorMessage: 'This field is required',
+          active: true,
+        },
+        'Date Range Rule': {
+          id: 'rule-date-001',
+          ruleType: 'validation',
+          priority: 2,
+          condition: 'startDate <= endDate',
+          errorMessage: 'Invalid date range: Start date must be before end date', // Changed
+          active: true,
+        },
+        'Auto-Assignment Rule': { // New rule
+          id: 'rule-assign-001',
+          ruleType: 'automation',
+          priority: 3,
+          condition: 'status === "new"',
+          errorMessage: null,
+          active: true,
+        },
+      },
+      Fields: {
+        inspectionDate: 'date',
+        inspector: 'lookup',
+        status: 'picklist',
+        priority: 'picklist', // New field
+        attachments: 'file', // New field
+      },
+    },
+    'Permit Domain': {
+      'Workflow Events': {
+        'On Create': {
+          id: 'wf-create-002',
+          triggerType: 'system',
+          enabled: true,
+          actions: ['assign-number', 'set-defaults', 'send-confirmation'], // Changed
+          notifyUsers: true, // Changed
+        },
+        'On Expire': { // New workflow event
+          id: 'wf-expire-002',
+          triggerType: 'scheduled',
+          enabled: true,
+          actions: ['update-status', 'notify-holder'],
+          notifyUsers: true,
+        },
+      },
+      Fields: {
+        permitNumber: 'auto-number',
+        applicant: 'lookup',
+        expirationDate: 'date',
+        renewalDate: 'date', // New field
+      },
     },
   },
-  notifications: {
-    email: {
-      enabled: true,
-      recipients: ['admin@example.com', 'security@example.com'], // Added
+  'User Management': {
+    'Roles & Permissions': {
+      Administrator: {
+        'Domain Permissions': {
+          'Inspection Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: null },
+            Delete: { granted: true, conditions: null },
+            'Approve Records': { granted: true, conditions: null },
+            'Export Data': { granted: true, conditions: null },
+            'Bulk Operations': { granted: true, conditions: null }, // New permission
+          },
+          'Permit Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: null },
+            Delete: { granted: true, conditions: null },
+            'Issue Permit': { granted: true, conditions: null },
+            'Revoke Permit': { granted: true, conditions: null }, // New permission
+          },
+        },
+        'System Permissions': {
+          'Manage Users': true,
+          'Manage Roles': true,
+          'View Audit Log': true,
+          'System Settings': true,
+          'API Access': true, // New permission
+        },
+      },
+      Inspector: {
+        'Domain Permissions': {
+          'Inspection Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: null }, // Changed - removed condition
+            Delete: { granted: false, conditions: null },
+            'Approve Records': { granted: true, conditions: 'priority !== "high"' }, // Changed
+            'Export Data': { granted: true, conditions: null },
+            'Bulk Operations': { granted: false, conditions: null }, // New permission
+          },
+          'Permit Domain': {
+            Create: { granted: false, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: 'assignedTo === currentUser' }, // Changed
+            Delete: { granted: false, conditions: null },
+            'Issue Permit': { granted: false, conditions: null },
+            'Revoke Permit': { granted: false, conditions: null }, // New permission
+          },
+        },
+        'System Permissions': {
+          'Manage Users': false,
+          'Manage Roles': false,
+          'View Audit Log': true, // Changed
+          'System Settings': false,
+          'API Access': false, // New permission
+        },
+      },
+      Supervisor: { // New role
+        'Domain Permissions': {
+          'Inspection Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: null },
+            Delete: { granted: true, conditions: 'status === "draft"' },
+            'Approve Records': { granted: true, conditions: null },
+            'Export Data': { granted: true, conditions: null },
+            'Bulk Operations': { granted: true, conditions: null },
+          },
+          'Permit Domain': {
+            Create: { granted: true, conditions: null },
+            Read: { granted: true, conditions: null },
+            Update: { granted: true, conditions: null },
+            Delete: { granted: false, conditions: null },
+            'Issue Permit': { granted: true, conditions: null },
+            'Revoke Permit': { granted: false, conditions: null },
+          },
+        },
+        'System Permissions': {
+          'Manage Users': true,
+          'Manage Roles': false,
+          'View Audit Log': true,
+          'System Settings': false,
+          'API Access': true,
+        },
+      },
     },
-    slack: {
-      enabled: true, // Changed
-      channel: '#alerts', // Added
+    'User Groups': {
+      'Field Team': {
+        members: 15, // Changed
+        defaultRole: 'Inspector',
+        supervisor: 'John Smith', // New
+      },
+      'Office Staff': {
+        members: 10, // Changed
+        defaultRole: 'Reviewer',
+        supervisor: 'Jane Doe', // New
+      },
+      'Management': { // New group
+        members: 3,
+        defaultRole: 'Supervisor',
+        supervisor: null,
+      },
     },
-    webhook: {
-      // New section
-      url: 'https://hooks.example.com/notify',
-      events: ['error', 'warning'],
-    },
-  },
-  features: {
-    darkMode: true, // Changed
-    betaFeatures: ['featureA', 'featureC'], // featureB removed, featureC added
-  },
-  audit: {
-    // New section
-    enabled: true,
-    retentionDays: 90,
   },
 };
 
@@ -117,27 +422,17 @@ const importedConfig: Record<string, unknown> = {
 const sampleVersions: Version[] = [
   {
     id: '4DEC27AB-0201-42D1-BF40-5D6E2DE435AC',
-    label: 'Version 10.2.10.63',
-    timestamp: new Date('2023-05-19T16:18:00'),
+    label: 'Version 2.0.0',
+    timestamp: new Date('2024-01-15T16:18:00'),
     author: 'John Smith',
-    data: checkpointV2,
+    data: dataV2,
   },
   {
     id: '3BCD16AB-0101-31C0-AE30-4C5D1CD324AB',
-    label: 'Version 10.2.10.62',
-    timestamp: new Date('2023-05-18T14:30:00'),
+    label: 'Version 1.0.0',
+    timestamp: new Date('2024-01-10T14:30:00'),
     author: 'Jane Doe',
-    data: checkpointV1,
-  },
-  {
-    id: '2ABC05AB-0001-20B0-9D20-3B4C0BC213AB',
-    label: 'Version 10.2.10.61',
-    timestamp: new Date('2023-05-15T09:15:00'),
-    author: 'Bob Wilson',
-    data: {
-      ...checkpointV1,
-      metadata: { version: '10.2.10.61', recordType: 'Inspection' },
-    },
+    data: dataV1,
   },
 ];
 
@@ -251,8 +546,8 @@ function App() {
         onClose={() => setConfigModalOpen(false)}
         title="Import Preview"
         subtitle="Review changes before importing configuration"
-        fromData={currentConfig}
-        toData={importedConfig}
+        fromData={dataV1}
+        toData={dataV2}
         fromLabel="Current Config"
         toLabel="Imported Config"
       />
@@ -261,10 +556,10 @@ function App() {
       <DiffModal
         isOpen={simpleModalOpen}
         onClose={() => setSimpleModalOpen(false)}
-        title="Object Comparison"
-        subtitle="Comparing two data objects"
-        fromData={checkpointV1}
-        toData={checkpointV2}
+        title="Configuration Changes"
+        subtitle="Comparing configuration versions"
+        fromData={dataV1}
+        toData={dataV2}
         fromLabel="Before"
         toLabel="After"
       />
@@ -273,10 +568,10 @@ function App() {
       <DiffModalV1
         isOpen={v1ModalOpen}
         onClose={() => setV1ModalOpen(false)}
-        title="'Inspection' Record Type Updated"
-        subtitle="Simplified view - single value column"
-        fromData={checkpointV1}
-        toData={checkpointV2}
+        title="System Configuration Updated"
+        subtitle="Review changes to configuration, records, and permissions"
+        fromData={dataV1}
+        toData={dataV2}
         valueLabel="Value"
       />
     </div>
