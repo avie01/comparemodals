@@ -220,6 +220,11 @@ function App() {
         versions={sampleVersions}
         fromLabel="From Value"
         toLabel="To Value"
+        onRollback={(versionId) => {
+          alert(`Rolling back to version: ${versionId}`);
+          setCheckpointModalOpen(false);
+        }}
+        rollbackLabel="Rollback to this version"
       />
 
       {/* Config Import Modal */}

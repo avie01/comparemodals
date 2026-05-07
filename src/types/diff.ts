@@ -95,6 +95,10 @@ export interface DiffModalProps {
   diffOptions?: DiffOptions;
   /** Additional CSS classes for the modal */
   className?: string;
+  /** Callback when rollback button is clicked (receives the target version ID) */
+  onRollback?: (versionId: string) => void;
+  /** Label for rollback button (default: "Rollback") */
+  rollbackLabel?: string;
 }
 
 /**
