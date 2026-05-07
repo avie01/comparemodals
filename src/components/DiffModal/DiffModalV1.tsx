@@ -26,10 +26,6 @@ export interface DiffModalV1Props {
   diffOptions?: DiffOptions;
   /** Additional CSS classes for the modal */
   className?: string;
-  /** Callback when primary action button is clicked */
-  onConfirm?: () => void;
-  /** Label for confirm button (default: "Confirm") */
-  confirmLabel?: string;
 }
 
 export function DiffModalV1({
@@ -42,8 +38,6 @@ export function DiffModalV1({
   valueLabel = 'Value',
   diffOptions,
   className = '',
-  onConfirm,
-  confirmLabel = 'Confirm',
 }: DiffModalV1Props) {
   const {
     diffNodes,
@@ -151,21 +145,13 @@ export function DiffModalV1({
                 </div>
 
                 {/* Footer */}
-                <div className="border-t border-gray-200 px-6 py-3 flex justify-end gap-3 bg-[#EDF1F5]">
+                <div className="border-t border-gray-200 px-6 py-3 flex justify-end bg-[#EDF1F5]">
                   <button
                     onClick={onClose}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#d1d1d1] rounded-[2px] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                   >
                     Close
                   </button>
-                  {onConfirm && (
-                    <button
-                      onClick={onConfirm}
-                      className="px-4 py-2 text-sm font-medium text-white bg-[#3560C1] rounded-[2px] hover:bg-[#2a4fa3] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                    >
-                      {confirmLabel}
-                    </button>
-                  )}
                 </div>
               </Dialog.Panel>
             </Transition.Child>

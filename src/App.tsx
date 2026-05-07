@@ -278,11 +278,6 @@ function App() {
         fromData={checkpointV1}
         toData={checkpointV2}
         valueLabel="Value"
-        onConfirm={() => {
-          alert('Changes confirmed!');
-          setV1ModalOpen(false);
-        }}
-        confirmLabel="Confirm"
       />
     </div>
   );
