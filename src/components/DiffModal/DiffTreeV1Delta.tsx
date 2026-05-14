@@ -33,7 +33,6 @@ export function DiffTreeV1Delta({
   nodes,
   expandedPaths,
   onToggleExpand,
-  valueLabel = 'Value',
   versionLabel,
   versionTimestamp,
   excludedPaths,

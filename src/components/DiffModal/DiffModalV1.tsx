@@ -7,7 +7,6 @@ import { useDiffTree } from '../../hooks/useDiffTree';
 import { useVersionComparison } from '../../hooks/useVersionComparison';
 import { DiffTreeV1 } from './DiffTreeV1';
 import { VersionSelector } from './VersionSelector';
-import { formatDate } from '../../utils/diff';
 import fileDocumentIcon from '../../assets/file-document.svg';
 
 export interface DiffModalV1Props {

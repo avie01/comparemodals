@@ -21,7 +21,6 @@ export function DiffTreeV1({
   nodes,
   expandedPaths,
   onToggleExpand,
-  valueLabel = 'Value',
   versionLabel,
   versionTimestamp,
 }: DiffTreeV1Props) {

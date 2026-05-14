@@ -123,7 +123,7 @@ export function DiffTreeNodeV1Delta({
                 type="checkbox"
                 checked={allChildrenExcluded}
                 ref={(el) => {
-                  if (el) el.indeterminate = someChildrenExcluded && !allChildrenExcluded;
+                  if (el) el.indeterminate = !!(someChildrenExcluded && !allChildrenExcluded);
                 }}
                 onChange={handleAccordionExcludeToggle}
                 className="w-4 h-4 text-[#3560C1] border-gray-300 rounded focus:ring-[#3560C1] cursor-pointer"
