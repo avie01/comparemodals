@@ -108,7 +108,7 @@ export function DiffTreeNodeV1Delta({
         </div>
 
         {/* Exclude column */}
-        <div className={`py-2 px-4 flex items-center gap-2 border-l border-[#d1d1d1]`}>
+        <div className={`py-2 px-4 flex items-center gap-2 border-l border-[#d1d1d1] self-stretch`}>
           <div className="w-4 flex justify-center">
             {isLeaf ? (
               <input

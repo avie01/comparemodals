@@ -34,16 +34,15 @@ export function DiffTreeV1({
   }
 
   return (
-    <div className="overflow-auto">
+    <div>
       {/* Header row - 2 columns */}
       <div className="grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)] sticky top-0 bg-white border-b border-[#d1d1d1] z-10">
         <div className="py-3 px-4 font-semibold text-[#707070] text-sm">
           Field
         </div>
-        <div className="py-3 px-4 border-l border-[#d1d1d1] flex items-center gap-2">
-          {versionLabel && <span className="font-semibold text-[#707070] text-sm">"{versionLabel}"</span>}
-          {versionTimestamp && <span className="font-semibold text-[#707070] text-sm">{formatDate(versionTimestamp)}</span>}
-          <span className="font-semibold text-[#707070] text-sm lowercase">{valueLabel}</span>
+        <div className="py-3 px-4 border-l border-[#d1d1d1]">
+          {versionLabel && <div className="font-semibold text-[#707070] text-sm">Values for {versionLabel}</div>}
+          {versionTimestamp && <div className="font-normal text-[#707070] text-sm">{formatDate(versionTimestamp)}</div>}
         </div>
       </div>
 

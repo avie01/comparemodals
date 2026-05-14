@@ -21,6 +21,27 @@ export function VersionSelector({
     onToChange(fromVersion);
   };
 
+  // Render simple labels when disabled
+  if (disabled) {
+    return (
+      <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">From:</span>
+            <span className="text-sm text-gray-900">Current configuration</span>
+          </div>
+
+          <ArrowsRightLeftIcon className="h-5 w-5 text-gray-400" />
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500">To:</span>
+            <span className="text-sm text-gray-900">{toVersionObj?.label || 'Select version'}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-4 flex-wrap">
       {/* Version selectors */}
@@ -28,9 +49,9 @@ export function VersionSelector({
           {/* From version */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">From:</span>
-            <Listbox value={fromVersion} onChange={onFromChange} disabled={disabled}>
+            <Listbox value={fromVersion} onChange={onFromChange}>
               <div className="relative">
-                <Listbox.Button className={`relative w-48 flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                <Listbox.Button className="relative w-48 cursor-pointer flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm">
                   <span className="block truncate">
                     {fromVersionObj?.label || 'Select version'}
                   </span>
@@ -84,8 +105,7 @@ export function VersionSelector({
           {/* Swap button */}
           <button
             onClick={handleSwap}
-            disabled={disabled}
-            className={`p-2 rounded-lg transition-colors ${disabled ? 'cursor-not-allowed opacity-60' : 'hover:bg-gray-100'}`}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             title="Swap versions"
           >
             <ArrowsRightLeftIcon className="h-5 w-5 text-gray-500" />
@@ -94,9 +114,9 @@ export function VersionSelector({
           {/* To version */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">To:</span>
-            <Listbox value={toVersion} onChange={onToChange} disabled={disabled}>
+            <Listbox value={toVersion} onChange={onToChange}>
               <div className="relative">
-                <Listbox.Button className={`relative w-48 flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
+                <Listbox.Button className="relative w-48 cursor-pointer flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm">
                   <span className="block truncate">
                     {toVersionObj?.label || 'Select version'}
                   </span>
