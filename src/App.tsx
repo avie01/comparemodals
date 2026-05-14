@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DiffModal, DiffModalV1 } from './components/DiffModal';
+import { DiffModal, DiffModalV1, DiffModalV1Delta } from './components/DiffModal';
 import type { Version } from './types/diff';
 
 // Deep nested sample data for complex hierarchies
@@ -441,6 +441,7 @@ function App() {
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [simpleModalOpen, setSimpleModalOpen] = useState(false);
   const [v1ModalOpen, setV1ModalOpen] = useState(false);
+  const [v1DeltaModalOpen, setV1DeltaModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 flex items-center justify-center">
@@ -521,6 +522,23 @@ function App() {
               View simplified modal
             </button>
           </div>
+
+          {/* V1 Delta Modal Card */}
+          <div className="bg-white rounded-[2px] border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              V1 Delta view
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Delta modal showing differences between configuration versions
+              with change indicators.
+            </p>
+            <button
+              onClick={() => setV1DeltaModalOpen(true)}
+              className="w-full px-4 py-2 bg-[#3560C1] text-white rounded-[2px] font-medium hover:bg-[#2a4fa3] transition-colors"
+            >
+              View delta modal
+            </button>
+          </div>
         </div>
 
       </div>
@@ -571,6 +589,24 @@ function App() {
         title="System Configuration Updated"
         versions={sampleVersions}
         valueLabel="Value"
+        onRollback={(versionId) => {
+          alert(`Rolling back to version: ${versionId}`);
+          setV1ModalOpen(false);
+        }}
+      />
+
+      {/* V1 Delta Modal */}
+      <DiffModalV1Delta
+        isOpen={v1DeltaModalOpen}
+        onClose={() => setV1DeltaModalOpen(false)}
+        title="Generate new configuration delta"
+        versions={sampleVersions}
+        valueLabel="Value"
+        rollbackLabel="Generate"
+        onRollback={(versionId, excludedPaths) => {
+          alert(`Rolling back to version: ${versionId}\nExcluded paths: ${excludedPaths.length > 0 ? excludedPaths.join(', ') : 'None'}`);
+          setV1DeltaModalOpen(false);
+        }}
       />
     </div>
   );

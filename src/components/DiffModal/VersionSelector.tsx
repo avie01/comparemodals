@@ -11,7 +11,8 @@ export function VersionSelector({
   toVersion,
   onFromChange,
   onToChange,
-}: VersionSelectorProps) {
+  disabled = false,
+}: VersionSelectorProps & { disabled?: boolean }) {
   const fromVersionObj = versions.find((v) => v.id === fromVersion);
   const toVersionObj = versions.find((v) => v.id === toVersion);
 
@@ -27,9 +28,9 @@ export function VersionSelector({
           {/* From version */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">From:</span>
-            <Listbox value={fromVersion} onChange={onFromChange}>
+            <Listbox value={fromVersion} onChange={onFromChange} disabled={disabled}>
               <div className="relative">
-                <Listbox.Button className="relative w-48 cursor-pointer flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm">
+                <Listbox.Button className={`relative w-48 flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                   <span className="block truncate">
                     {fromVersionObj?.label || 'Select version'}
                   </span>
@@ -83,7 +84,8 @@ export function VersionSelector({
           {/* Swap button */}
           <button
             onClick={handleSwap}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            disabled={disabled}
+            className={`p-2 rounded-lg transition-colors ${disabled ? 'cursor-not-allowed opacity-60' : 'hover:bg-gray-100'}`}
             title="Swap versions"
           >
             <ArrowsRightLeftIcon className="h-5 w-5 text-gray-500" />
@@ -92,9 +94,9 @@ export function VersionSelector({
           {/* To version */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-500">To:</span>
-            <Listbox value={toVersion} onChange={onToChange}>
+            <Listbox value={toVersion} onChange={onToChange} disabled={disabled}>
               <div className="relative">
-                <Listbox.Button className="relative w-48 cursor-pointer flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm">
+                <Listbox.Button className={`relative w-48 flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                   <span className="block truncate">
                     {toVersionObj?.label || 'Select version'}
                   </span>

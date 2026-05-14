@@ -1,5 +1,6 @@
 import type { DiffNode } from '../../types/diff';
 import { DiffTreeNodeV1 } from './DiffTreeNodeV1';
+import { formatDate } from '../../utils/diff';
 
 export interface DiffTreeV1Props {
   /** Root diff nodes to render */
@@ -10,6 +11,10 @@ export interface DiffTreeV1Props {
   onToggleExpand: (pathKey: string) => void;
   /** Label for value column (default: "Value") */
   valueLabel?: string;
+  /** Version label to display above the value label */
+  versionLabel?: string;
+  /** Version timestamp to display in the header */
+  versionTimestamp?: Date;
 }
 
 export function DiffTreeV1({
@@ -17,6 +22,8 @@ export function DiffTreeV1({
   expandedPaths,
   onToggleExpand,
   valueLabel = 'Value',
+  versionLabel,
+  versionTimestamp,
 }: DiffTreeV1Props) {
   if (nodes.length === 0) {
     return (
@@ -33,8 +40,10 @@ export function DiffTreeV1({
         <div className="py-3 px-4 font-semibold text-[#707070] text-sm">
           Field
         </div>
-        <div className="py-3 px-4 font-semibold text-[#707070] text-sm border-l border-[#d1d1d1]">
-          {valueLabel}
+        <div className="py-3 px-4 border-l border-[#d1d1d1] flex items-center gap-2">
+          {versionLabel && <span className="font-semibold text-[#707070] text-sm">"{versionLabel}"</span>}
+          {versionTimestamp && <span className="font-semibold text-[#707070] text-sm">{formatDate(versionTimestamp)}</span>}
+          <span className="font-semibold text-[#707070] text-sm lowercase">{valueLabel}</span>
         </div>
       </div>
 

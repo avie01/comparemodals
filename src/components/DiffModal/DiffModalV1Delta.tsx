@@ -1,16 +1,15 @@
-import { Fragment } from 'react';
+import { Fragment, useState, useCallback, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/20/solid';
 import type { DiffOptions, Version } from '../../types/diff';
 import { useDiffTree } from '../../hooks/useDiffTree';
 import { useVersionComparison } from '../../hooks/useVersionComparison';
-import { DiffTreeV1 } from './DiffTreeV1';
+import { DiffTreeV1Delta } from './DiffTreeV1Delta';
 import { VersionSelector } from './VersionSelector';
-import { formatDate } from '../../utils/diff';
 import fileDocumentIcon from '../../assets/file-document.svg';
 
-export interface DiffModalV1Props {
+export interface DiffModalV1DeltaProps {
   /** Controls modal visibility */
   isOpen: boolean;
   /** Callback when modal should close */
@@ -35,13 +34,13 @@ export interface DiffModalV1Props {
   diffOptions?: DiffOptions;
   /** Additional CSS classes for the modal */
   className?: string;
-  /** Callback when rollback is clicked (receives version ID) */
-  onRollback?: (versionId: string) => void;
+  /** Callback when rollback is clicked (receives version ID and excluded paths) */
+  onRollback?: (versionId: string, excludedPaths: string[]) => void;
   /** Label for rollback button */
   rollbackLabel?: string;
 }
 
-export function DiffModalV1({
+export function DiffModalV1Delta({
   isOpen,
   onClose,
   title,
@@ -56,7 +55,54 @@ export function DiffModalV1({
   className = '',
   onRollback,
   rollbackLabel = 'Roll back',
-}: DiffModalV1Props) {
+}: DiffModalV1DeltaProps) {
+  // Excluded paths state
+  const [excludedPaths, setExcludedPaths] = useState<Set<string>>(new Set());
+
+  // Toggle exclude for a path
+  const toggleExclude = useCallback((pathKey: string) => {
+    setExcludedPaths(prev => {
+      const next = new Set(prev);
+      if (next.has(pathKey)) {
+        next.delete(pathKey);
+      } else {
+        next.add(pathKey);
+      }
+      return next;
+    });
+  }, []);
+
+  // Toggle exclude for multiple paths
+  const toggleExcludeMultiple = useCallback((pathKeys: string[], exclude: boolean) => {
+    setExcludedPaths(prev => {
+      const next = new Set(prev);
+      pathKeys.forEach(pathKey => {
+        if (exclude) {
+          next.add(pathKey);
+        } else {
+          next.delete(pathKey);
+        }
+      });
+      return next;
+    });
+  }, []);
+
+  // Helper to collect all leaf node path keys
+  const collectLeafPaths = useCallback((nodes: typeof diffNodes): string[] => {
+    const paths: string[] = [];
+    const traverse = (nodeList: typeof diffNodes) => {
+      for (const node of nodeList) {
+        if (node.children && node.children.length > 0) {
+          traverse(node.children);
+        } else {
+          paths.push(node.pathKey);
+        }
+      }
+    };
+    traverse(nodes);
+    return paths;
+  }, []);
+
   // Version comparison mode (when versions prop is provided)
   const versionComparison = useVersionComparison(
     versions || [],
@@ -77,8 +123,31 @@ export function DiffModalV1({
     totalChanges,
   } = useDiffTree(fromData || {}, toData || {}, diffOptions);
 
+  // Get all leaf paths and calculate exclude states
+  const allLeafPaths = useMemo(() => collectLeafPaths(diffNodes), [diffNodes, collectLeafPaths]);
+  const allExcluded = allLeafPaths.length > 0 && allLeafPaths.every(path => excludedPaths.has(path));
+  const someExcluded = allLeafPaths.some(path => excludedPaths.has(path));
+
+  // Toggle all excludes
+  const toggleExcludeAll = useCallback(() => {
+    if (allExcluded) {
+      // Uncheck all
+      setExcludedPaths(new Set());
+    } else {
+      // Check all
+      setExcludedPaths(new Set(allLeafPaths));
+    }
+  }, [allExcluded, allLeafPaths]);
+
   // Build subtitle - use provided subtitle or default description
-  const versionSubtitle = subtitle || (versions ? 'This shows the difference between these configurations versions' : undefined);
+  const versionSubtitle = subtitle || (versions ? 'Review the delta changes and exclude any values you do not want to roll back' : undefined);
+
+  // Handle rollback with excluded paths
+  const handleRollback = () => {
+    if (onRollback && versionComparison.toVersionId) {
+      onRollback(versionComparison.toVersionId, Array.from(excludedPaths));
+    }
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -157,6 +226,9 @@ export function DiffModalV1({
                     <div className="flex items-center gap-3">
                       <span className="text-sm text-gray-600">
                         {totalChanges} change{totalChanges !== 1 ? 's' : ''}
+                        {excludedPaths.size > 0 && (
+                          <span className="text-gray-400"> ({excludedPaths.size} excluded)</span>
+                        )}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -182,13 +254,19 @@ export function DiffModalV1({
 
                 {/* Content */}
                 <div className="max-h-[60vh] overflow-auto bg-white">
-                  <DiffTreeV1
+                  <DiffTreeV1Delta
                     nodes={diffNodes}
                     expandedPaths={expandedPaths}
                     onToggleExpand={toggleExpand}
                     valueLabel={valueLabel}
                     versionLabel={versionComparison.toVersion?.label}
                     versionTimestamp={versionComparison.toVersion?.timestamp}
+                    excludedPaths={excludedPaths}
+                    onToggleExclude={toggleExclude}
+                    onToggleExcludeMultiple={toggleExcludeMultiple}
+                    onToggleExcludeAll={toggleExcludeAll}
+                    allExcluded={allExcluded}
+                    someExcluded={someExcluded}
                   />
                 </div>
 
@@ -202,7 +280,7 @@ export function DiffModalV1({
                   </button>
                   {onRollback && versionComparison.toVersionId && (
                     <button
-                      onClick={() => onRollback(versionComparison.toVersionId!)}
+                      onClick={handleRollback}
                       className="px-4 py-2 text-sm font-medium text-white bg-[#3560C1] rounded-[2px] hover:bg-[#2a4fa3] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                     >
                       {rollbackLabel}
