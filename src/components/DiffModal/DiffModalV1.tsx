@@ -146,7 +146,6 @@ export function DiffModalV1({
                         toVersion={versionComparison.toVersionId || ''}
                         onFromChange={versionComparison.setFromVersionId}
                         onToChange={versionComparison.setToVersionId}
-                        disabled
                       />
                     </div>
                   )}
