@@ -1,6 +1,7 @@
 import { Fragment, useState, useCallback, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { WarningAlt } from '@carbon/icons-react';
 import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/20/solid';
 import type { DiffOptions, Version } from '../../types/diff';
 import { useDiffTree } from '../../hooks/useDiffTree';
@@ -58,6 +59,9 @@ export function DiffModalV1Delta({
 }: DiffModalV1DeltaProps) {
   // Excluded paths state
   const [excludedPaths, setExcludedPaths] = useState<Set<string>>(new Set());
+
+  // Banner dismissal state
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   // Toggle exclude for a path
   const toggleExclude = useCallback((pathKey: string) => {
@@ -250,6 +254,23 @@ export function DiffModalV1Delta({
                       </button>
                     </div>
                   </div>
+
+                  {/* Info alert banner */}
+                  {excludedPaths.size > 0 && !bannerDismissed && (
+                    <div className="mt-4 flex items-center gap-3 rounded-[2px] bg-[#FDEED3] p-3">
+                      <WarningAlt size={20} className="flex-shrink-0 text-[#FF832B]" />
+                      <p className="flex-1 text-sm text-[#32372f]">
+                        Excluding changes from the referenced configuration may cause issues. Please take careful consideration when excluding changes.
+                      </p>
+                      <button
+                        onClick={() => setBannerDismissed(true)}
+                        className="flex-shrink-0 p-1 hover:bg-[#f5e4c0] rounded transition-colors"
+                        aria-label="Dismiss warning"
+                      >
+                        <XMarkIcon className="h-4 w-4 text-[#32372f]" />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
