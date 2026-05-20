@@ -580,8 +580,8 @@ function App() {
         onClose={() => setCheckpointModalOpen(false)}
         title="'Inspection' Record Type Updated"
         versions={sampleVersions}
-        fromLabel="From Value"
-        toLabel="To Value"
+        fromLabel="Baseline"
+        toLabel="Target"
         onRollback={(versionId) => {
           alert(`Rolling back to version: ${versionId}`);
           setCheckpointModalOpen(false);
@@ -597,8 +597,8 @@ function App() {
         subtitle="Review changes before importing configuration"
         fromData={dataV1}
         toData={dataV2}
-        fromLabel="Current Config"
-        toLabel="Imported Config"
+        fromLabel="Current"
+        toLabel="Imported"
       />
 
       {/* Simple Comparison Modal */}
@@ -609,8 +609,8 @@ function App() {
         subtitle="Comparing configuration versions"
         fromData={dataV1}
         toData={dataV2}
-        fromLabel="Before"
-        toLabel="After"
+        fromLabel="Baseline"
+        toLabel="Target"
       />
 
       {/* V1 Simplified Modal */}

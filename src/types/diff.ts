@@ -81,9 +81,9 @@ export interface DiffModalProps {
   fromData?: Record<string, unknown>;
   /** Target data for comparison (used when versions not provided) */
   toData?: Record<string, unknown>;
-  /** Label for "from" column (default: "From Value") */
+  /** Label for "from" column (default: "Baseline") */
   fromLabel?: string;
-  /** Label for "to" column (default: "To Value") */
+  /** Label for "to" column (default: "Target") */
   toLabel?: string;
   /** Enable version selector mode with list of versions */
   versions?: Version[];
