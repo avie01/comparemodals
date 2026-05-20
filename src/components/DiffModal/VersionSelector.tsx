@@ -36,7 +36,7 @@ export function VersionSelector({
 
           {/* Target version (rolling back to) */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-[#1A56DB] bg-[#EDF4FF] px-3 py-1.5 rounded">Rolling back to</span>
+            <span className="text-sm font-medium text-[#1A56DB] bg-[#EDF4FF] px-3 py-1.5 rounded">Restoring to</span>
             <span className="text-sm font-medium text-gray-900">{toVersionObj?.label || 'Select version'}</span>
           </div>
         </div>

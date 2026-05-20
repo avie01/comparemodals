@@ -26,7 +26,7 @@ export function DiffModal({
   diffOptions,
   className = '',
   onRollback,
-  rollbackLabel = 'Rollback',
+  rollbackLabel = 'Restore',
 }: DiffModalProps) {
   // Version comparison mode (when versions prop is provided)
   const versionComparison = useVersionComparison(

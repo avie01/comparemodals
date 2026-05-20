@@ -59,7 +59,7 @@ export function DiffModalV1({
   diffOptions,
   className = '',
   onRollback,
-  rollbackLabel = 'Roll back',
+  rollbackLabel = 'Restore',
   breakingChanges = [],
   initiallyExpanded = true,
 }: DiffModalV1Props) {

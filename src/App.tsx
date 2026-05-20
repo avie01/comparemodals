@@ -586,7 +586,7 @@ function App() {
           alert(`Rolling back to version: ${versionId}`);
           setCheckpointModalOpen(false);
         }}
-        rollbackLabel="Rollback to this version"
+        rollbackLabel="Restore to this version"
       />
 
       {/* Config Import Modal */}

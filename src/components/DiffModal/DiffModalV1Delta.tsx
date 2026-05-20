@@ -55,7 +55,7 @@ export function DiffModalV1Delta({
   diffOptions,
   className = '',
   onRollback,
-  rollbackLabel = 'Roll back',
+  rollbackLabel = 'Restore',
 }: DiffModalV1DeltaProps) {
   // Excluded paths state
   const [excludedPaths, setExcludedPaths] = useState<Set<string>>(new Set());
