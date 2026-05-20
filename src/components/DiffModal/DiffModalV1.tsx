@@ -251,7 +251,7 @@ export function DiffModalV1({
                           : 'text-white bg-[#3560C1] hover:bg-[#2a4fa3]'
                       }`}
                     >
-                      {rollbackLabel}{versionComparison.toVersion?.label ? ` to ${versionComparison.toVersion.label}` : ''}
+                      {rollbackLabel}
                     </button>
                   )}
                 </div>
