@@ -2,7 +2,8 @@ import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/20/solid';
-import type { DiffOptions, Version } from '../../types/diff';
+import type { DiffOptions, Version, BreakingChange } from '../../types/diff';
+import alertIcon from '../../assets/alert.svg';
 import { useDiffTree } from '../../hooks/useDiffTree';
 import { useVersionComparison } from '../../hooks/useVersionComparison';
 import { DiffTreeV1 } from './DiffTreeV1';
@@ -38,6 +39,10 @@ export interface DiffModalV1Props {
   onRollback?: (versionId: string) => void;
   /** Label for rollback button */
   rollbackLabel?: string;
+  /** Breaking changes that prevent rollback */
+  breakingChanges?: BreakingChange[];
+  /** Whether to expand all nodes by default (default: true) */
+  initiallyExpanded?: boolean;
 }
 
 export function DiffModalV1({
@@ -55,7 +60,10 @@ export function DiffModalV1({
   className = '',
   onRollback,
   rollbackLabel = 'Roll back',
+  breakingChanges = [],
+  initiallyExpanded = true,
 }: DiffModalV1Props) {
+  const hasBreakingChanges = breakingChanges.length > 0;
   // Version comparison mode (when versions prop is provided)
   const versionComparison = useVersionComparison(
     versions || [],
@@ -74,7 +82,7 @@ export function DiffModalV1({
     expandAll,
     collapseAll,
     totalChanges,
-  } = useDiffTree(fromData || {}, toData || {}, diffOptions);
+  } = useDiffTree(fromData || {}, toData || {}, { ...diffOptions, initiallyExpanded });
 
   // Build subtitle - use provided subtitle or default description
   const versionSubtitle = subtitle || (versions ? 'This shows the difference between these configurations versions' : undefined);
@@ -150,6 +158,41 @@ export function DiffModalV1({
                     </div>
                   )}
 
+                  {/* Error banner for breaking changes */}
+                  {hasBreakingChanges && (
+                    <div className="mt-4 rounded-[2px] bg-[#F7E4E6] p-4">
+                      <div className="flex items-start gap-3">
+                        <img src={alertIcon} alt="" className="flex-shrink-0 w-5 h-5 mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="text-sm font-semibold text-[#32373F] mb-2">
+                            Unable to roll back due to breaking changes
+                          </h4>
+                          <p className="text-sm text-[#161616] mb-3">
+                            The following record types have dependencies that must be deleted before this rollback can be completed:
+                          </p>
+                          <ul className="space-y-2">
+                            {breakingChanges.map((change, index) => (
+                              <li key={index} className="text-sm text-[#161616]">
+                                <div className="flex items-start gap-2">
+                                  <span className="font-medium">{change.recordType}</span>
+                                  <span className="text-gray-500">({change.count} record{change.count !== 1 ? 's' : ''})</span>
+                                </div>
+                                <p className="text-gray-600 mt-0.5 ml-0">{change.reason}</p>
+                                {change.details && change.details.length > 0 && (
+                                  <ul className="mt-1 ml-4 list-disc text-gray-500">
+                                    {change.details.map((detail, detailIndex) => (
+                                      <li key={detailIndex}>{detail}</li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Simple summary and controls */}
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center gap-3">
@@ -201,9 +244,14 @@ export function DiffModalV1({
                   {onRollback && versionComparison.toVersionId && (
                     <button
                       onClick={() => onRollback(versionComparison.toVersionId!)}
-                      className="px-4 py-2 text-sm font-medium text-white bg-[#3560C1] rounded-[2px] hover:bg-[#2a4fa3] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                      disabled={hasBreakingChanges}
+                      className={`px-4 py-2 text-sm font-medium rounded-[2px] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                        hasBreakingChanges
+                          ? 'text-gray-400 bg-gray-200 cursor-not-allowed'
+                          : 'text-white bg-[#3560C1] hover:bg-[#2a4fa3]'
+                      }`}
                     >
-                      {rollbackLabel}
+                      {rollbackLabel}{versionComparison.toVersion?.label ? ` to ${versionComparison.toVersion.label}` : ''}
                     </button>
                   )}
                 </div>

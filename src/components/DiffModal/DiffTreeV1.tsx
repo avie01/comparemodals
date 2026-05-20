@@ -40,8 +40,13 @@ export function DiffTreeV1({
           Field
         </div>
         <div className="py-3 px-4 border-l border-[#d1d1d1]">
-          {versionLabel && <div className="font-semibold text-[#707070] text-sm">Values for {versionLabel}</div>}
-          {versionTimestamp && <div className="font-normal text-[#707070] text-sm">{formatDate(versionTimestamp)}</div>}
+          {versionLabel && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-[#1A56DB] bg-[#EDF4FF] px-3 py-1.5 rounded">Target</span>
+              <span className="font-semibold text-[#707070] text-sm">{versionLabel}</span>
+            </div>
+          )}
+          {versionTimestamp && <div className="font-normal text-[#707070] text-sm mt-0.5">{formatDate(versionTimestamp)}</div>}
         </div>
       </div>
 

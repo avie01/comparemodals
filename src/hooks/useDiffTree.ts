@@ -27,18 +27,24 @@ export interface UseDiffTreeResult {
   changeSummary: { added: number; removed: number; modified: number };
 }
 
+export interface UseDiffTreeOptions extends DiffOptions {
+  /** Whether to expand all nodes by default (default: true) */
+  initiallyExpanded?: boolean;
+}
+
 /**
  * Hook for managing diff tree state including expansion and memoized computation
  */
 export function useDiffTree(
   fromData: unknown,
   toData: unknown,
-  options: DiffOptions = {}
+  options: UseDiffTreeOptions = {}
 ): UseDiffTreeResult {
+  const { initiallyExpanded = true, ...diffOptions } = options;
   // Memoize diff tree calculation
   const diffNodes = useMemo(
-    () => buildDiffTree(fromData, toData, options),
-    [fromData, toData, options]
+    () => buildDiffTree(fromData, toData, diffOptions),
+    [fromData, toData, diffOptions]
   );
 
   // Calculate change summary
@@ -71,14 +77,16 @@ export function useDiffTree(
   // Track if initial expand has happened
   const hasInitialExpanded = useRef(false);
 
-  // Expand all by default only on initial mount
+  // Expand all by default only on initial mount (if initiallyExpanded is true)
   useEffect(() => {
     if (!hasInitialExpanded.current && diffNodes.length > 0) {
-      const allPaths = getAllExpandablePaths(diffNodes);
-      setExpandedPaths(new Set(allPaths));
+      if (initiallyExpanded) {
+        const allPaths = getAllExpandablePaths(diffNodes);
+        setExpandedPaths(new Set(allPaths));
+      }
       hasInitialExpanded.current = true;
     }
-  }, [diffNodes]);
+  }, [diffNodes, initiallyExpanded]);
 
   const toggleExpand = useCallback((pathKey: string) => {
     setExpandedPaths((prev) => {

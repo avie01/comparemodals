@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
-import { CheckIcon, ArrowsRightLeftIcon } from '@heroicons/react/20/solid';
+import { CheckIcon, ArrowsRightLeftIcon, ArrowLongRightIcon } from '@heroicons/react/20/solid';
 import type { VersionSelectorProps } from '../../types/diff';
 import { formatDate } from '../../utils/diff';
 import chevronDown from '../../assets/navigation-chevron-down.svg';
@@ -25,17 +25,19 @@ export function VersionSelector({
   if (disabled) {
     return (
       <div className="flex items-center gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">From:</span>
-            <span className="text-sm text-gray-900">Current configuration</span>
+        <div className="flex items-center gap-3">
+          {/* Current version */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded px-3 py-2">
+            <span className="text-xs font-medium text-gray-500">Current</span>
+            <span className="text-sm font-medium text-gray-900">{fromVersionObj?.label || 'Current configuration'}</span>
           </div>
 
-          <ArrowsRightLeftIcon className="h-5 w-5 text-gray-400" />
+          <ArrowLongRightIcon className="h-6 w-6 text-[#3560C1]" />
 
+          {/* Target version (rolling back to) */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">To:</span>
-            <span className="text-sm text-gray-900">{toVersionObj?.label || 'Select version'}</span>
+            <span className="text-sm font-medium text-[#1A56DB] bg-[#EDF4FF] px-3 py-1.5 rounded">Rolling back to</span>
+            <span className="text-sm font-medium text-gray-900">{toVersionObj?.label || 'Select version'}</span>
           </div>
         </div>
       </div>

@@ -304,7 +304,7 @@ export function DiffModalV1Delta({
                       onClick={handleRollback}
                       className="px-4 py-2 text-sm font-medium text-white bg-[#3560C1] rounded-[2px] hover:bg-[#2a4fa3] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                     >
-                      {rollbackLabel}
+                      {rollbackLabel}{versionComparison.toVersion?.label ? ` to ${versionComparison.toVersion.label}` : ''}
                     </button>
                   )}
                 </div>

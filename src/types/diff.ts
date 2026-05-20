@@ -174,6 +174,20 @@ export interface DiffValueCellProps {
 }
 
 /**
+ * Represents a breaking change that prevents rollback
+ */
+export interface BreakingChange {
+  /** Type of record that conflicts */
+  recordType: string;
+  /** Number of records affected */
+  count: number;
+  /** Description of why this is a breaking change */
+  reason: string;
+  /** Optional details about specific records */
+  details?: string[];
+}
+
+/**
  * Props for the ChangeTypeBadge component
  */
 export interface ChangeTypeBadgeProps {

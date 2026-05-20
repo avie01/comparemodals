@@ -1,6 +1,19 @@
 import { useState } from 'react';
 import { DiffModal, DiffModalV1, DiffModalV1Delta } from './components/DiffModal';
-import type { Version } from './types/diff';
+import type { Version, BreakingChange } from './types/diff';
+
+// Sample breaking changes for error state demo
+const sampleBreakingChanges: BreakingChange[] = [
+  {
+    recordType: 'Inspection Records',
+    count: 47,
+    reason: 'These records depend on the "On Escalate" workflow event that will be removed in the target version.',
+    details: [
+      'INS-2024-001 through INS-2024-047',
+      'All records created after Jan 12, 2024',
+    ],
+  },
+];
 
 // Deep nested sample data for complex hierarchies
 const dataV1: Record<string, unknown> = {
@@ -442,6 +455,7 @@ function App() {
   const [simpleModalOpen, setSimpleModalOpen] = useState(false);
   const [v1ModalOpen, setV1ModalOpen] = useState(false);
   const [v1DeltaModalOpen, setV1DeltaModalOpen] = useState(false);
+  const [v1ErrorModalOpen, setV1ErrorModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 flex items-center justify-center">
@@ -539,6 +553,23 @@ function App() {
               View delta modal
             </button>
           </div>
+
+          {/* V1 Error State Card */}
+          <div className="bg-white rounded-[2px] border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              V1 Simplified (Error)
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Shows error banner when breaking changes prevent rollback.
+              Rollback button is disabled.
+            </p>
+            <button
+              onClick={() => setV1ErrorModalOpen(true)}
+              className="w-full px-4 py-2 bg-[#DA1E28] text-white rounded-[2px] font-medium hover:bg-[#ba1b23] transition-colors"
+            >
+              View error state
+            </button>
+          </div>
         </div>
 
       </div>
@@ -606,6 +637,21 @@ function App() {
         onRollback={(versionId, excludedPaths) => {
           alert(`Rolling back to version: ${versionId}\nExcluded paths: ${excludedPaths.length > 0 ? excludedPaths.join(', ') : 'None'}`);
           setV1DeltaModalOpen(false);
+        }}
+      />
+
+      {/* V1 Error State Modal */}
+      <DiffModalV1
+        isOpen={v1ErrorModalOpen}
+        onClose={() => setV1ErrorModalOpen(false)}
+        title="System Configuration Updated"
+        versions={sampleVersions}
+        valueLabel="Value"
+        breakingChanges={sampleBreakingChanges}
+        initiallyExpanded={false}
+        onRollback={(versionId) => {
+          alert(`Rolling back to version: ${versionId}`);
+          setV1ErrorModalOpen(false);
         }}
       />
     </div>
