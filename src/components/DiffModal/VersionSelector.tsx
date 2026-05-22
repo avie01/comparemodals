@@ -1,6 +1,7 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Listbox, Transition } from '@headlessui/react';
-import { CheckIcon, ArrowsRightLeftIcon, ArrowLongRightIcon } from '@heroicons/react/20/solid';
+import { CheckIcon, ArrowsRightLeftIcon, ArrowLongRightIcon, InformationCircleIcon } from '@heroicons/react/20/solid';
 import type { VersionSelectorProps } from '../../types/diff';
 import { formatDate } from '../../utils/diff';
 import chevronDown from '../../assets/navigation-chevron-down.svg';
@@ -15,6 +16,14 @@ export function VersionSelector({
 }: VersionSelectorProps & { disabled?: boolean }) {
   const fromVersionObj = versions.find((v) => v.id === fromVersion);
   const toVersionObj = versions.find((v) => v.id === toVersion);
+
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
+
+  const showTooltip = (e: React.MouseEvent<HTMLSpanElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipPos({ top: rect.top + rect.height / 2, left: rect.right + 8 });
+  };
+  const hideTooltip = () => setTooltipPos(null);
 
   const handleSwap = () => {
     onFromChange(toVersion);
@@ -74,7 +83,7 @@ export function VersionSelector({
                         value={version.id}
                         disabled={version.id === toVersion}
                         className={({ active, disabled }) =>
-                          `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
+                          `relative cursor-pointer select-none py-2 pl-10 pr-10 ${
                             disabled ? 'text-gray-400 bg-gray-50' : ''
                           } ${active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'}`
                         }
@@ -94,6 +103,13 @@ export function VersionSelector({
                                 <CheckIcon className="h-5 w-5" aria-hidden="true" />
                               </span>
                             )}
+                            <span
+                              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"
+                              onMouseEnter={showTooltip}
+                              onMouseLeave={hideTooltip}
+                            >
+                              <InformationCircleIcon className="h-4 w-4" aria-hidden="true" />
+                            </span>
                           </>
                         )}
                       </Listbox.Option>
@@ -139,7 +155,7 @@ export function VersionSelector({
                         value={version.id}
                         disabled={version.id === fromVersion}
                         className={({ active, disabled }) =>
-                          `relative cursor-pointer select-none py-2 pl-10 pr-4 ${
+                          `relative cursor-pointer select-none py-2 pl-10 pr-10 ${
                             disabled ? 'text-gray-400 bg-gray-50' : ''
                           } ${active ? 'bg-blue-100 text-blue-900' : 'text-gray-900'}`
                         }
@@ -159,6 +175,13 @@ export function VersionSelector({
                                 <CheckIcon className="h-5 w-5" aria-hidden="true" />
                               </span>
                             )}
+                            <span
+                              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400"
+                              onMouseEnter={showTooltip}
+                              onMouseLeave={hideTooltip}
+                            >
+                              <InformationCircleIcon className="h-4 w-4" aria-hidden="true" />
+                            </span>
                           </>
                         )}
                       </Listbox.Option>
@@ -169,6 +192,17 @@ export function VersionSelector({
             </Listbox>
           </div>
         </div>
+      {tooltipPos &&
+        createPortal(
+          <div
+            role="tooltip"
+            style={{ top: tooltipPos.top, left: tooltipPos.left, transform: 'translateY(-50%)' }}
+            className="pointer-events-none fixed z-[100] whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-lg"
+          >
+            Automatically created before restoring version "before change"
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
