@@ -51,7 +51,7 @@ export function DiffTreeV1Delta({
   }
 
   return (
-    <div>
+    <div className="px-4">
       {/* Header row - 3 columns */}
       <div className="grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)_180px] items-start sticky top-0 bg-white border-b border-[#d1d1d1] z-10">
         <div className="py-3 px-4 font-semibold text-[#707070] text-sm">

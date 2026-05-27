@@ -37,7 +37,7 @@ export function DiffTreeNodeV1({
     <>
       {/* Main row - 2 columns: Field | Value */}
       <div
-        className={`grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)] min-h-[36px] items-center hover:bg-[#e8e8e8] ${hasChildren ? 'bg-[#EDF1F5]' : ''}`}
+        className={`grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)] min-h-[36px] items-center hover:bg-[#e8e8e8] ${hasChildren ? 'bg-[#f5f5f5]' : ''}`}
       >
         {/* Field column */}
         <div className="flex items-center py-2 pr-4" style={{ paddingLeft: `${indent + 12}px` }}>
