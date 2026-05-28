@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DiffModal, DiffModalV1, DiffModalV1Delta } from './components/DiffModal';
+import { DiffModal, DiffModalV1, DiffModalV1Delta, DiffModalV1RecordMatches } from './components/DiffModal';
 import type { Version, BreakingChange } from './types/diff';
 
 // Sample breaking changes for error state demo
@@ -449,12 +449,56 @@ const sampleVersions: Version[] = [
   },
 ];
 
+// Data for the V1 Record matches modal (records matched for deletion)
+const recordMatchesData: Record<string, unknown> = {
+  'Delete records': {
+    Incident: {
+      'Incident report': 24,
+      'Make a complaint': 8,
+      Person: 15,
+      Organisation: 6,
+    },
+    Inspection: {
+      Person: 11,
+      Organisation: 4,
+    },
+  },
+};
+
+// Target keeps the same containers but empties them, so each matched record
+// recurses into an individual "removed" leaf instead of collapsing to one node
+const recordMatchesEmptied: Record<string, unknown> = {
+  'Delete records': {
+    Incident: {},
+    Inspection: {},
+  },
+};
+
+// Baseline holds the matched records; target empties them so they render as removed
+const recordMatchesVersions: Version[] = [
+  {
+    id: 'C5FE38CD-0301-53E2-CF50-6E7F3EF546BD',
+    label: 'Version 2.0.0',
+    timestamp: new Date('2024-01-15T16:18:00'),
+    author: 'John Smith',
+    data: recordMatchesEmptied,
+  },
+  {
+    id: 'B4ED27BC-0201-42D1-BE40-5D6E2DE435AC',
+    label: 'Version 1.0.0',
+    timestamp: new Date('2024-01-10T14:30:00'),
+    author: 'Jane Doe',
+    data: recordMatchesData,
+  },
+];
+
 function App() {
   const [checkpointModalOpen, setCheckpointModalOpen] = useState(false);
   const [configModalOpen, setConfigModalOpen] = useState(false);
   const [simpleModalOpen, setSimpleModalOpen] = useState(false);
   const [v1ModalOpen, setV1ModalOpen] = useState(false);
   const [v1DeltaModalOpen, setV1DeltaModalOpen] = useState(false);
+  const [v1RecordMatchesModalOpen, setV1RecordMatchesModalOpen] = useState(false);
   const [v1ErrorModalOpen, setV1ErrorModalOpen] = useState(false);
 
   return (
@@ -554,6 +598,23 @@ function App() {
             </button>
           </div>
 
+          {/* V1 Record Matches Card */}
+          <div className="bg-white rounded-[2px] border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              V1 Record matches
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Standalone duplicate of the V1 Delta view, ready to diverge for
+              record-matching workflows.
+            </p>
+            <button
+              onClick={() => setV1RecordMatchesModalOpen(true)}
+              className="w-full px-4 py-2 bg-[#3560C1] text-white rounded-[2px] font-medium hover:bg-[#2a4fa3] transition-colors"
+            >
+              View record matches modal
+            </button>
+          </div>
+
           {/* V1 Error State Card */}
           <div className="bg-white rounded-[2px] border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
@@ -637,6 +698,20 @@ function App() {
         onRollback={(versionId, excludedPaths) => {
           alert(`Rolling back to version: ${versionId}\nExcluded paths: ${excludedPaths.length > 0 ? excludedPaths.join(', ') : 'None'}`);
           setV1DeltaModalOpen(false);
+        }}
+      />
+
+      {/* V1 Record Matches Modal */}
+      <DiffModalV1RecordMatches
+        isOpen={v1RecordMatchesModalOpen}
+        onClose={() => setV1RecordMatchesModalOpen(false)}
+        title="V1 Record matches"
+        versions={recordMatchesVersions}
+        valueLabel="Value"
+        rollbackLabel="Generate"
+        onRollback={(versionId, excludedPaths) => {
+          alert(`Rolling back to version: ${versionId}\nExcluded paths: ${excludedPaths.length > 0 ? excludedPaths.join(', ') : 'None'}`);
+          setV1RecordMatchesModalOpen(false);
         }}
       />
 

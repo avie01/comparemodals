@@ -15,3 +15,8 @@ export { DiffValueCellV1 } from './DiffValueCellV1';
 export { DiffModalV1Delta } from './DiffModalV1Delta';
 export { DiffTreeV1Delta } from './DiffTreeV1Delta';
 export { DiffTreeNodeV1Delta } from './DiffTreeNodeV1Delta';
+
+// V1 Record Matches - standalone duplicate of the V1 Delta view
+export { DiffModalV1RecordMatches } from './DiffModalV1RecordMatches';
+export { DiffTreeV1RecordMatches } from './DiffTreeV1RecordMatches';
+export { DiffTreeNodeV1RecordMatches } from './DiffTreeNodeV1RecordMatches';

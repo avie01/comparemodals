@@ -74,18 +74,23 @@ export function useDiffTree(
   // Track expanded paths
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set());
 
-  // Track if initial expand has happened
-  const hasInitialExpanded = useRef(false);
+  // Signature of the tree we last applied the default expansion to. Re-applying
+  // when this changes means a new tree (e.g. switching versions/data) re-expands
+  // to the default view, while re-renders of the same tree keep manual toggles.
+  const expandedSignatureRef = useRef<string | null>(null);
 
-  // Expand all by default only on initial mount (if initiallyExpanded is true)
+  // Apply default expansion whenever the underlying tree changes
   useEffect(() => {
-    if (!hasInitialExpanded.current && diffNodes.length > 0) {
-      if (initiallyExpanded) {
-        const allPaths = getAllExpandablePaths(diffNodes);
-        setExpandedPaths(new Set(allPaths));
-      }
-      hasInitialExpanded.current = true;
+    if (diffNodes.length === 0) return;
+
+    const expandablePaths = getAllExpandablePaths(diffNodes);
+    const signature = expandablePaths.join('|');
+    if (expandedSignatureRef.current === signature) return;
+
+    if (initiallyExpanded) {
+      setExpandedPaths(new Set(expandablePaths));
     }
+    expandedSignatureRef.current = signature;
   }, [diffNodes, initiallyExpanded]);
 
   const toggleExpand = useCallback((pathKey: string) => {

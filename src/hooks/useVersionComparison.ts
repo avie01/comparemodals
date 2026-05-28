@@ -57,12 +57,18 @@ export function useVersionComparison(
     }
   }, [mode, versions]);
 
-  // Initialize versions on mount if not set
+  // Initialize (or re-seed) selection when the current one isn't valid for the
+  // given versions — covers first mount and a versions prop that changed under us
   useEffect(() => {
-    if (versions.length >= 2 && !fromVersionId && !toVersionId) {
+    if (versions.length === 0) return;
+
+    const fromValid = versions.some((v) => v.id === fromVersionId);
+    const toValid = versions.some((v) => v.id === toVersionId);
+
+    if (versions.length >= 2 && !fromValid && !toValid) {
       setToVersionId(versions[0].id);
       setFromVersionId(versions[1].id);
-    } else if (versions.length === 1 && !toVersionId) {
+    } else if (versions.length === 1 && !toValid) {
       setToVersionId(versions[0].id);
     }
   }, [versions, fromVersionId, toVersionId]);
