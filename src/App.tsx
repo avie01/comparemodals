@@ -449,7 +449,10 @@ const sampleVersions: Version[] = [
   },
 ];
 
-// Data for the V1 Record matches modal (records matched for deletion)
+// Data for the V1 Record matches modal (records matched for deletion).
+// Target holds the matched record counts; baseline keeps the same containers
+// but empties them so each leaf renders individually with a value in the Target
+// column instead of collapsing to a single node.
 const recordMatchesData: Record<string, unknown> = {
   'Delete records': {
     Incident: {
@@ -465,8 +468,6 @@ const recordMatchesData: Record<string, unknown> = {
   },
 };
 
-// Target keeps the same containers but empties them, so each matched record
-// recurses into an individual "removed" leaf instead of collapsing to one node
 const recordMatchesEmptied: Record<string, unknown> = {
   'Delete records': {
     Incident: {},
@@ -474,21 +475,20 @@ const recordMatchesEmptied: Record<string, unknown> = {
   },
 };
 
-// Baseline holds the matched records; target empties them so they render as removed
 const recordMatchesVersions: Version[] = [
   {
     id: 'C5FE38CD-0301-53E2-CF50-6E7F3EF546BD',
     label: 'Version 2.0.0',
     timestamp: new Date('2024-01-15T16:18:00'),
     author: 'John Smith',
-    data: recordMatchesEmptied,
+    data: recordMatchesData,
   },
   {
     id: 'B4ED27BC-0201-42D1-BE40-5D6E2DE435AC',
     label: 'Version 1.0.0',
     timestamp: new Date('2024-01-10T14:30:00'),
     author: 'Jane Doe',
-    data: recordMatchesData,
+    data: recordMatchesEmptied,
   },
 ];
 

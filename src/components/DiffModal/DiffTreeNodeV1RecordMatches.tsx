@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
 import type { DiffNode } from '../../types/diff';
+import { DiffValueCellV1 } from './DiffValueCellV1';
 
 export interface DiffTreeNodeV1RecordMatchesProps {
   /** The diff node data */
@@ -67,9 +68,9 @@ export function DiffTreeNodeV1RecordMatches({
 
   return (
     <>
-      {/* Main row - 2 columns: Field | Exclude */}
+      {/* Main row - 3 columns: Field | Value | Exclude */}
       <div
-        className={`grid grid-cols-[minmax(300px,1fr)_180px] min-h-[36px] items-center hover:bg-[#e8e8e8] ${hasChildren ? 'bg-[#f5f5f5]' : ''}`}
+        className={`grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)_180px] min-h-[36px] items-center hover:bg-[#e8e8e8] ${hasChildren ? 'bg-[#f5f5f5]' : ''}`}
       >
         {/* Field column */}
         <div className="flex items-center py-2 pr-4" style={{ paddingLeft: `${indent + 12}px` }}>
@@ -90,10 +91,21 @@ export function DiffTreeNodeV1RecordMatches({
             )}
 
             {/* Node label - no summary badge */}
-            <span className={hasChildren ? 'text-[#32373F] text-[14px] font-semibold leading-[21px]' : `text-sm text-gray-900 ${isExcluded ? 'line-through text-[#D0000A]' : ''}`}>
+            <span className={hasChildren ? 'text-[#32373F] text-[14px] font-semibold leading-[21px]' : 'text-sm text-gray-900'}>
               {node.displayLabel || node.key}
             </span>
           </div>
+        </div>
+
+        {/* Value column (toValue only) */}
+        <div className={`py-2 px-4 ${isLeaf ? 'border-l border-[#d1d1d1]' : ''}`}>
+          {isLeaf && (
+            <DiffValueCellV1
+              value={node.toValue}
+              changeType={node.changeType}
+              excluded={isExcluded}
+            />
+          )}
         </div>
 
         {/* Exclude column */}

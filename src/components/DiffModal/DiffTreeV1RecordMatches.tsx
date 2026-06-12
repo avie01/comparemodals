@@ -1,5 +1,6 @@
 import type { DiffNode } from '../../types/diff';
 import { DiffTreeNodeV1RecordMatches } from './DiffTreeNodeV1RecordMatches';
+import { formatDate } from '../../utils/diff';
 
 export interface DiffTreeV1RecordMatchesProps {
   /** Root diff nodes to render */
@@ -32,6 +33,8 @@ export function DiffTreeV1RecordMatches({
   nodes,
   expandedPaths,
   onToggleExpand,
+  versionLabel,
+  versionTimestamp,
   excludedPaths,
   onToggleExclude,
   onToggleExcludeMultiple,
@@ -49,10 +52,19 @@ export function DiffTreeV1RecordMatches({
 
   return (
     <div className="px-4">
-      {/* Header row - 2 columns (Field | Exclude) */}
-      <div className="grid grid-cols-[minmax(300px,1fr)_180px] items-start sticky top-0 bg-white border-b border-[#d1d1d1] z-10">
+      {/* Header row - 3 columns */}
+      <div className="grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)_180px] items-start sticky top-0 bg-white border-b border-[#d1d1d1] z-10">
         <div className="py-3 px-4 font-semibold text-[#707070] text-sm">
           Field
+        </div>
+        <div className="py-3 px-4 border-l border-[#d1d1d1]">
+          {versionLabel && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-[#1A56DB] bg-[#EDF4FF] px-3 py-1.5 rounded">Target</span>
+              <span className="font-semibold text-[#707070] text-sm">{versionLabel}</span>
+            </div>
+          )}
+          {versionTimestamp && <div className="font-normal text-[#707070] text-sm mt-0.5">{formatDate(versionTimestamp)}</div>}
         </div>
         <div className="py-3 px-4 border-l border-[#d1d1d1] flex items-start gap-2 self-stretch">
           <div className="w-4 flex justify-center">

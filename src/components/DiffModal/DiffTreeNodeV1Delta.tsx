@@ -98,11 +98,12 @@ export function DiffTreeNodeV1Delta({
         </div>
 
         {/* Value column (toValue only) */}
-        <div className={`py-2 px-4 ${isLeaf ? 'border-l border-[#d1d1d1]' : ''} ${isExcluded ? 'line-through text-[#D0000A]' : ''}`}>
+        <div className={`py-2 px-4 ${isLeaf ? 'border-l border-[#d1d1d1]' : ''}`}>
           {isLeaf && (
             <DiffValueCellV1
               value={node.toValue}
               changeType={node.changeType}
+              excluded={isExcluded}
             />
           )}
         </div>
