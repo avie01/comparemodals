@@ -18,7 +18,7 @@ export function DiffModal({
   subtitle,
   fromData: directFromData,
   toData: directToData,
-  fromLabel = 'Baseline',
+  fromLabel = 'Current',
   toLabel = 'Target',
   versions,
   initialFromVersion,

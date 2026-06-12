@@ -485,7 +485,7 @@ const recordMatchesVersions: Version[] = [
   },
   {
     id: 'B4ED27BC-0201-42D1-BE40-5D6E2DE435AC',
-    label: 'Version 1.0.0',
+    label: 'Current',
     timestamp: new Date('2024-01-10T14:30:00'),
     author: 'Jane Doe',
     data: recordMatchesEmptied,
@@ -641,7 +641,7 @@ function App() {
         onClose={() => setCheckpointModalOpen(false)}
         title="'Inspection' Record Type Updated"
         versions={sampleVersions}
-        fromLabel="Baseline"
+        fromLabel="Current"
         toLabel="Target"
         onRollback={(versionId) => {
           alert(`Rolling back to version: ${versionId}`);
@@ -670,7 +670,7 @@ function App() {
         subtitle="Comparing configuration versions"
         fromData={dataV1}
         toData={dataV2}
-        fromLabel="Baseline"
+        fromLabel="Current"
         toLabel="Target"
       />
 
