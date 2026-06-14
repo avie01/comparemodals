@@ -694,10 +694,8 @@ function App() {
         title="Generate new configuration delta"
         versions={sampleVersions}
         valueLabel="Value"
-        rollbackLabel="Generate"
-        onRollback={(versionId, excludedPaths) => {
-          alert(`Rolling back to version: ${versionId}\nExcluded paths: ${excludedPaths.length > 0 ? excludedPaths.join(', ') : 'None'}`);
-          setV1DeltaModalOpen(false);
+        onGenerate={(delta) => {
+          console.log('Generated delta:', delta);
         }}
       />
 

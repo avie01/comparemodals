@@ -11,9 +11,13 @@ export interface DiffTreeV1DeltaProps {
   onToggleExpand: (pathKey: string) => void;
   /** Label for value column (default: "Value") */
   valueLabel?: string;
-  /** Version label to display in the header */
+  /** Baseline (from) version label */
+  baselineLabel?: string;
+  /** Baseline (from) timestamp */
+  baselineTimestamp?: Date;
+  /** Target (to) version label */
   versionLabel?: string;
-  /** Version timestamp to display in the header */
+  /** Target (to) timestamp */
   versionTimestamp?: Date;
   /** Set of excluded path keys */
   excludedPaths: Set<string>;
@@ -33,6 +37,8 @@ export function DiffTreeV1Delta({
   nodes,
   expandedPaths,
   onToggleExpand,
+  baselineLabel,
+  baselineTimestamp,
   versionLabel,
   versionTimestamp,
   excludedPaths,
@@ -52,18 +58,27 @@ export function DiffTreeV1Delta({
 
   return (
     <div className="px-4">
-      {/* Header row - 3 columns */}
-      <div className="grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)_180px] items-start sticky top-0 bg-white border-b border-[#d1d1d1] z-10">
+      {/* Header row - 4 columns */}
+      <div className="grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)_minmax(200px,1fr)_180px] items-start sticky top-0 bg-white border-b border-[#d1d1d1] z-10">
         <div className="py-3 px-4 font-semibold text-[#707070] text-sm">
           Field
         </div>
         <div className="py-3 px-4 border-l border-[#d1d1d1]">
-          {versionLabel && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-[#1A56DB] bg-[#EDF4FF] px-3 py-1.5 rounded">Target</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-[#707070] bg-gray-100 px-3 py-1.5 rounded">Baseline</span>
+            {baselineLabel && (
+              <span className="font-semibold text-[#707070] text-sm">{baselineLabel}</span>
+            )}
+          </div>
+          {baselineTimestamp && <div className="font-normal text-[#707070] text-sm mt-0.5">{formatDate(baselineTimestamp)}</div>}
+        </div>
+        <div className="py-3 px-4 border-l border-[#d1d1d1]">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-[#1A56DB] bg-[#EDF4FF] px-3 py-1.5 rounded">Target</span>
+            {versionLabel && (
               <span className="font-semibold text-[#707070] text-sm">{versionLabel}</span>
-            </div>
-          )}
+            )}
+          </div>
           {versionTimestamp && <div className="font-normal text-[#707070] text-sm mt-0.5">{formatDate(versionTimestamp)}</div>}
         </div>
         <div className="py-3 px-4 border-l border-[#d1d1d1] flex items-start gap-2 self-stretch">

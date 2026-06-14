@@ -2,13 +2,63 @@ import { Fragment, useState, useCallback, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { WarningAlt } from '@carbon/icons-react';
-import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/20/solid';
-import type { DiffOptions, Version } from '../../types/diff';
+import { ArrowsPointingOutIcon, ArrowsPointingInIcon, ArrowLongRightIcon } from '@heroicons/react/20/solid';
+import type { ChangeType, DiffNode, DiffOptions, Version } from '../../types/diff';
 import { useDiffTree } from '../../hooks/useDiffTree';
 import { useVersionComparison } from '../../hooks/useVersionComparison';
 import { DiffTreeV1Delta } from './DiffTreeV1Delta';
 import { VersionSelector } from './VersionSelector';
 import fileDocumentIcon from '../../assets/file-document.svg';
+
+/** Output payload emitted by the Generate action — the included delta minus excluded leaves */
+export interface GeneratedDelta {
+  changes: Array<{
+    path: string[];
+    pathKey: string;
+    changeType: ChangeType;
+    fromValue?: unknown;
+    toValue?: unknown;
+  }>;
+  totalIncluded: number;
+  excludedPaths: string[];
+  /** Target version id when in 'versions' mode */
+  targetVersionId?: string;
+  /** Target file/source name when in 'upload' mode */
+  targetName?: string;
+}
+
+function flattenIncludedChanges(nodes: DiffNode[], excluded: Set<string>) {
+  const out: GeneratedDelta['changes'] = [];
+  const walk = (ns: DiffNode[]) => {
+    for (const n of ns) {
+      if (n.children && n.children.length > 0) {
+        walk(n.children);
+      } else if (!excluded.has(n.pathKey)) {
+        out.push({
+          path: n.path,
+          pathKey: n.pathKey,
+          changeType: n.changeType,
+          fromValue: n.fromValue,
+          toValue: n.toValue,
+        });
+      }
+    }
+  };
+  walk(nodes);
+  return out;
+}
+
+function downloadJson(filename: string, payload: unknown) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 export interface DiffModalV1DeltaProps {
   /** Controls modal visibility */
@@ -19,13 +69,17 @@ export interface DiffModalV1DeltaProps {
   title: string;
   /** Subtitle or description */
   subtitle?: string;
-  /** Source data for comparison (used when versions not provided) */
+  /** Comparison mode. 'versions' uses the versions[] list + selector; 'upload' uses fromData/toData and labels them with targetName. */
+  mode?: 'versions' | 'upload';
+  /** Source data for comparison (required in 'upload' mode) */
   fromData?: Record<string, unknown>;
-  /** Target data for comparison (used when versions not provided) */
+  /** Target data for comparison (required in 'upload' mode) */
   toData?: Record<string, unknown>;
+  /** Display name for the target source in 'upload' mode (e.g. uploaded filename) */
+  targetName?: string;
   /** Label for value column (default: "Value") */
   valueLabel?: string;
-  /** Enable version selector mode with list of versions */
+  /** Versions list (required in 'versions' mode) */
   versions?: Version[];
   /** Initially selected from version (defaults to second version) */
   initialFromVersion?: string;
@@ -35,10 +89,10 @@ export interface DiffModalV1DeltaProps {
   diffOptions?: DiffOptions;
   /** Additional CSS classes for the modal */
   className?: string;
-  /** Callback when rollback is clicked (receives version ID and excluded paths) */
-  onRollback?: (versionId: string, excludedPaths: string[]) => void;
-  /** Label for rollback button */
-  rollbackLabel?: string;
+  /** Fires when Generate is clicked. Receives the included delta. */
+  onGenerate?: (delta: GeneratedDelta) => void;
+  /** Label for primary action button (default: "Generate") */
+  generateLabel?: string;
 }
 
 export function DiffModalV1Delta({
@@ -46,16 +100,18 @@ export function DiffModalV1Delta({
   onClose,
   title,
   subtitle,
+  mode = 'versions',
   fromData: directFromData,
   toData: directToData,
+  targetName,
   valueLabel = 'Value',
   versions,
   initialFromVersion,
   initialToVersion,
   diffOptions,
   className = '',
-  onRollback,
-  rollbackLabel = 'Restore',
+  onGenerate,
+  generateLabel = 'Generate',
 }: DiffModalV1DeltaProps) {
   // Excluded paths state
   const [excludedPaths, setExcludedPaths] = useState<Set<string>>(new Set());
@@ -107,16 +163,16 @@ export function DiffModalV1Delta({
     return paths;
   }, []);
 
-  // Version comparison mode (when versions prop is provided)
+  // useVersionComparison only drives the source descriptor + diff in 'versions' mode
   const versionComparison = useVersionComparison(
-    versions || [],
+    mode === 'versions' && versions ? versions : [],
     initialFromVersion,
     initialToVersion
   );
 
-  // Determine which data to use
-  const fromData = versions ? versionComparison.fromData : directFromData;
-  const toData = versions ? versionComparison.toData : directToData;
+  // Resolve data based on mode
+  const fromData = mode === 'versions' ? versionComparison.fromData : directFromData;
+  const toData = mode === 'versions' ? versionComparison.toData : directToData;
 
   const {
     diffNodes,
@@ -144,13 +200,24 @@ export function DiffModalV1Delta({
   }, [allExcluded, allLeafPaths]);
 
   // Build subtitle - use provided subtitle or default description
-  const versionSubtitle = subtitle || (versions ? 'Review the delta changes and exclude any values you do not want to roll back' : undefined);
+  const versionSubtitle = subtitle || 'Review the changes and generate a delta. Excluded changes will not be included.';
 
-  // Handle rollback with excluded paths
-  const handleRollback = () => {
-    if (onRollback && versionComparison.toVersionId) {
-      onRollback(versionComparison.toVersionId, Array.from(excludedPaths));
-    }
+  // Disable Generate when there are no changes or every leaf is excluded
+  const generateDisabled = diffNodes.length === 0 || allLeafPaths.length === 0 || allExcluded;
+
+  const handleGenerate = () => {
+    if (generateDisabled) return;
+    const changes = flattenIncludedChanges(diffNodes, excludedPaths);
+    const delta: GeneratedDelta = {
+      changes,
+      totalIncluded: changes.length,
+      excludedPaths: Array.from(excludedPaths),
+      targetVersionId: mode === 'versions' ? versionComparison.toVersionId : undefined,
+      targetName: mode === 'upload' ? targetName : undefined,
+    };
+    downloadJson('delta.json', delta);
+    onGenerate?.(delta);
+    onClose();
   };
 
   return (
@@ -211,8 +278,8 @@ export function DiffModalV1Delta({
                     </button>
                   </div>
 
-                  {/* Version selector (if versions provided) */}
-                  {versions && versions.length > 1 && (
+                  {/* Source descriptor */}
+                  {mode === 'versions' && versions && versions.length > 1 && (
                     <div className="mt-4">
                       <VersionSelector
                         versions={versions}
@@ -222,6 +289,19 @@ export function DiffModalV1Delta({
                         onToChange={versionComparison.setToVersionId}
                         disabled
                       />
+                    </div>
+                  )}
+                  {mode === 'upload' && (
+                    <div className="mt-4 flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">Baseline:</span>
+                        <span className="text-sm font-medium text-gray-900">Current configuration</span>
+                      </div>
+                      <ArrowLongRightIcon className="h-6 w-6 text-[#3560C1]" />
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">Target:</span>
+                        <span className="text-sm font-medium text-gray-900">{targetName || 'Uploaded configuration'}</span>
+                      </div>
                     </div>
                   )}
 
@@ -260,7 +340,7 @@ export function DiffModalV1Delta({
                     <div className="mt-4 flex items-center gap-3 rounded-[2px] bg-[#FDEED3] p-3">
                       <WarningAlt size={20} className="flex-shrink-0 text-[#FF832B]" />
                       <p className="flex-1 text-sm text-[#32372f]">
-                        Excluding changes from the referenced configuration may cause issues. Please take careful consideration when excluding changes.
+                        Excluded changes won't be included in the generated delta.
                       </p>
                       <button
                         onClick={() => setBannerDismissed(true)}
@@ -280,8 +360,10 @@ export function DiffModalV1Delta({
                     expandedPaths={expandedPaths}
                     onToggleExpand={toggleExpand}
                     valueLabel={valueLabel}
-                    versionLabel={versionComparison.toVersion?.label}
-                    versionTimestamp={versionComparison.toVersion?.timestamp}
+                    baselineLabel={mode === 'versions' ? versionComparison.fromVersion?.label : 'Current configuration'}
+                    baselineTimestamp={mode === 'versions' ? versionComparison.fromVersion?.timestamp : undefined}
+                    versionLabel={mode === 'versions' ? versionComparison.toVersion?.label : targetName}
+                    versionTimestamp={mode === 'versions' ? versionComparison.toVersion?.timestamp : undefined}
                     excludedPaths={excludedPaths}
                     onToggleExclude={toggleExclude}
                     onToggleExcludeMultiple={toggleExcludeMultiple}
@@ -299,14 +381,18 @@ export function DiffModalV1Delta({
                   >
                     Close
                   </button>
-                  {onRollback && versionComparison.toVersionId && (
-                    <button
-                      onClick={handleRollback}
-                      className="px-4 py-2 text-sm font-medium text-white bg-[#3560C1] rounded-[2px] hover:bg-[#2a4fa3] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                    >
-                      {rollbackLabel}
-                    </button>
-                  )}
+                  <button
+                    onClick={handleGenerate}
+                    disabled={generateDisabled}
+                    title={generateDisabled ? 'Nothing to generate — the delta is empty.' : undefined}
+                    className={`px-4 py-2 text-sm font-medium rounded-[2px] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                      generateDisabled
+                        ? 'text-gray-400 bg-gray-200 cursor-not-allowed'
+                        : 'text-white bg-[#3560C1] hover:bg-[#2a4fa3]'
+                    }`}
+                  >
+                    {generateLabel}
+                  </button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

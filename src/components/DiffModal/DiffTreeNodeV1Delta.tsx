@@ -68,9 +68,9 @@ export function DiffTreeNodeV1Delta({
 
   return (
     <>
-      {/* Main row - 3 columns: Field | Value | Exclude */}
+      {/* Main row - 4 columns: Field | Baseline | Target | Exclude */}
       <div
-        className={`grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)_180px] min-h-[36px] items-center hover:bg-[#e8e8e8] ${hasChildren ? 'bg-[#f5f5f5]' : ''}`}
+        className={`grid grid-cols-[minmax(300px,1fr)_minmax(200px,1fr)_minmax(200px,1fr)_180px] min-h-[36px] items-center hover:bg-[#e8e8e8] ${hasChildren ? 'bg-[#f5f5f5]' : ''}`}
       >
         {/* Field column */}
         <div className="flex items-center py-2 pr-4" style={{ paddingLeft: `${indent + 12}px` }}>
@@ -97,12 +97,25 @@ export function DiffTreeNodeV1Delta({
           </div>
         </div>
 
-        {/* Value column (toValue only) */}
+        {/* Baseline column (fromValue) */}
+        <div className={`py-2 px-4 ${isLeaf ? 'border-l border-[#d1d1d1]' : ''}`}>
+          {isLeaf && (
+            <DiffValueCellV1
+              value={node.fromValue}
+              changeType={node.changeType}
+              column="from"
+              excluded={isExcluded}
+            />
+          )}
+        </div>
+
+        {/* Target column (toValue) */}
         <div className={`py-2 px-4 ${isLeaf ? 'border-l border-[#d1d1d1]' : ''}`}>
           {isLeaf && (
             <DiffValueCellV1
               value={node.toValue}
               changeType={node.changeType}
+              column="to"
               excluded={isExcluded}
             />
           )}
