@@ -35,9 +35,9 @@ export function VersionSelector({
     return (
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          {/* Current version */}
+          {/* Baseline version */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Current:</span>
+            <span className="text-sm text-gray-500">Baseline:</span>
             <span className="text-sm font-medium text-gray-900">{fromVersionObj?.label || 'Current configuration'}</span>
           </div>
 
@@ -59,7 +59,7 @@ export function VersionSelector({
       <div className="flex items-center gap-2">
           {/* From version */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Current:</span>
+            <span className="text-sm text-gray-500">Baseline:</span>
             <Listbox value={fromVersion} onChange={onFromChange}>
               <div className="relative">
                 <Listbox.Button className="relative w-48 cursor-pointer flex items-center gap-3 py-2.5 px-4 text-left border-b border-[#ACACAC] bg-[#F5F5F5] focus:outline-none sm:text-sm">
